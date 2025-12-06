@@ -156,8 +156,71 @@ print("The hexadecimal equivalent of SHA1 is : ")
 print(result.hexdigest())
 
 # 4. `CheckPwned.py` – Check leaked passwords via Have I Been Pwned.
+
+import hashlib
+import requests
+
+def check_password(password):
+
+    sha1 = hashlib.sha1(password.encode()).hexdigest().upper()
+    prefix = sha1[:5]
+    suffix = sha1[5:]
+
+    url = f"https://api.pwnedpasswords.com/range/{prefix}"
+    response = requests.get(url)
+
+    for line in response.text.splitlines():
+        hash_suffix, count = line.split(":")
+        if hash_suffix == suffix:
+            return int(count)
+    return 0
+
+
+username = input("Enter username: ")
+password = input("Enter password: ")
+
+count = check_password(password)
+
+if count > 0:
+    print(f"{username}: ❌ Password found {count} times in data breaches.")
+else:
+    print(f"{username}: ✅ Password NOT found. Safe to use.")
+
 # 5. `RandomPassword.py` – Generate passphrase-style passwords from dictionary words.
+
+import random
+
+words = ["apple", "sun", "river", "cloud", "happy", "star", "blue", "green"]
+
+num_words = int(input("How many words in password? "))
+
+password = "-".join(random.choice(words) for _ in range(num_words))
+
+print("Generated Password:", password)
+
 # 6. `BruteForceAttack.py` – Simulated brute-force attack on simple passwords.
 
+import itertools
+import string
 
+password = input("Enter a small password: ")
+chars = string.ascii_lowercase
 
+found = False
+attempts = 0
+
+for length in range(1, len(password) + 1):
+    for combo in itertools.product(chars, repeat=length):
+        attempts += 1
+        guess = "".join(combo)
+
+        if guess == password:
+            print("Password found:", guess)
+            print("Attempts:", attempts)
+            found = True
+            break
+    if found:
+        break
+
+if not found:
+    print("Password not found within length limit.")
